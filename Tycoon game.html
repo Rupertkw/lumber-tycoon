@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lumber Yard Tycoon</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Bubblegum+Sans:wght@400&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Bubblegum Sans', cursive;
+      background: #33c9ea;
+	  
+      background-size: contain;
+      overflow: hidden;
+      text-align: center;
+    }
+/* Prevent text selection on double-click */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Specifically target clickable elements */
+#tree, #boss-tree, .upgrade, #boss-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+    #currency {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      border-radius: 25px;
+      padding: 12px 25px;
+      font-size: 22px;
+      font-family: 'Fredoka One', cursive;
+      color: #2C1810;
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 3px solid #FFB347;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    #currency img {
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+
+    #progress {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(145deg, #FF69B4, #FF1493);
+  padding: 15px 35px;
+  border-radius: 30px;
+  font-family: 'Fredoka One', cursive;
+  font-weight: bold;
+  font-size: 20px;
+  color: white;
+  box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  border: 3px solid #FFB6C1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  min-width: 300px;
+}
+
+ #tree {
+  width: 300px;
+  margin: 0;
+  cursor: pointer;
+  transition: transform 0.1s;
+  position: relative;
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+    #axe {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+
+    .axe-swing {
+      opacity: 1 !important;
+      transform: translate(-30%, -30%) rotate(15deg) !important;
+    }
+
+    .shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+ @keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+#sell-overlay {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0,0,0,0.8); 
+  z-index: 6000; 
+  display: none; 
+  font-family: 'Fredoka One', cursive; 
+  text-align: center;
+}
+
+    #upgrades {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .upgrade {
+      background: linear-gradient(145deg, #87CEEB, #4169E1);
+      color: white;
+      padding: 20px 15px;
+      border-radius: 20px;
+      width: 140px;
+      box-shadow: 0 8px 20px rgba(65, 105, 225, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      border: 3px solid #B0E0E6;
+      font-family: 'Fredoka One', cursive;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .upgrade img {
+      width: 40px;
+      height: 40px;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .upgrade:hover {
+      background: linear-gradient(145deg, #4169E1, #1E90FF);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(65, 105, 225, 0.6);
+    }
+
+    .upgrade.affordable {
+      background: linear-gradient(145deg, #32CD32, #228B22);
+      border: 3px solid #90EE90;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 8px 20px rgba(50, 205, 50, 0.4); }
+      to { box-shadow: 0 12px 30px rgba(50, 205, 50, 0.8), 0 0 20px rgba(144, 238, 144, 0.6); }
+    }
+
+    .upgrade-level {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: linear-gradient(145deg, #FF4500, #DC143C);
+      color: white;
+      border-radius: 15px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-family: 'Fredoka One', cursive;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      border: 2px solid #FFB347;
+    }
+
+    .floating-text {
+      position: absolute;
+      font-family: 'Fredoka One', cursive;
+      font-weight: bold;
+      font-size: 24px;
+      color: #32CD32;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(50, 205, 50, 0.6);
+      animation: floatUp 1.2s ease-out forwards;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-50px); }
+    }
+
+    #boss-button {
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(145deg, #FF6B35, #FF4500);
+      color: white;
+      padding: 18px 25px;
+      border-radius: 25px;
+      font-family: 'Fredoka One', cursive;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+      display: none;
+      animation: pulse 2s infinite, bounce 1s ease-in-out infinite alternate;
+      border: 4px solid #FFD700;
+      text-align: center;
+      min-width: 130px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(-50%) scale(1); }
+      100% { transform: translateY(-50%) scale(1.05); }
+    }
+
+    #boss-button:hover {
+      background: linear-gradient(145deg, #FF4500, #DC143C);
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 6px 12px rgba(255, 107, 53, 0.4); }
+      50% { box-shadow: 0 8px 20px rgba(255, 107, 53, 0.8), 0 0 20px rgba(255, 215, 0, 0.6); }
+      100% { box-shadow: 0 6px 12px rgba(255, 107, 53, 0.4); }
+    }
+#boss-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #33c9ea;
+  z-index: 5000;
+  display: none;
+  font-family: 'Fredoka One', cursive;
+  text-align: center;
+  overflow: hidden;
+}
+
+#boss-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#boss-currency {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: linear-gradient(145deg, #FFD700, #FFA500);
+  border-radius: 25px;
+  padding: 12px 25px;
+  font-size: 22px;
+  font-family: 'Fredoka One', cursive;
+  color: #2C1810;
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 3px solid #FFB347;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+#boss-health-display {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(145deg, #FF69B4, #FF1493);
+  padding: 10px 25px;
+  border-radius: 30px;
+  font-family: 'Fredoka One', cursive;
+  font-weight: bold;
+  font-size: 18px;
+  color: white;
+  box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  border: 3px solid #FFB6C1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+#boss-upgrades {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+    .boss-shake {
+      animation: bossShake 0.4s ease-in-out;
+    }
+
+    @keyframes bossShake {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(-10deg) scale(1.05); }
+      75% { transform: rotate(10deg) scale(1.05); }
+    }
+
+    @keyframes achievementPop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30% { transform: translate(-50%, -50%) scale(1); }
+      90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .achievement {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      color: #333;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      z-index: 2000;
+      animation: achievementPop 3s ease-out forwards;
+    }
+    
+    #combo-display {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(145deg, #FF6347, #FF4500);
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-family: 'Fredoka One', cursive;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  box-shadow: 0 6px 15px rgba(255, 99, 71, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  display: none;
+  border: 3px solid #FFB347;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  animation: comboGlow 1s ease-in-out infinite alternate;
+}
+
+    @keyframes comboGlow {
+      from { box-shadow: 0 6px 15px rgba(255, 99, 71, 0.4); }
+      to { box-shadow: 0 8px 20px rgba(255, 99, 71, 0.8), 0 0 15px rgba(255, 179, 71, 0.6); }
+    }
+    .progress-complete {
+  animation: progressPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes progressPulse {
+  from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  to { box-shadow: 0 0 20px rgba(255, 215, 0, 1), inset 0 0 10px rgba(255, 255, 255, 0.2); }
+}
+
+#tree-selector {
+  position: absolute;
+  bottom: 40px;
+  left: 30px;
+  transform: none;
+  background: linear-gradient(145deg, #8B4513, #A0522D);
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.4);
+  border: 3px solid #CD853F;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 100;
+}
+
+#tree-selector button {
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+@keyframes damageFlash {
+  0% { filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4)) brightness(0.7) sepia(0.3) hue-rotate(15deg); }
+  50% { filter: drop-shadow(3px 3px 6px rgba(255,0,0,0.6)) brightness(1.2) sepia(0.5) hue-rotate(-45deg) saturate(2); }
+  100% { filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4)) brightness(0.7) sepia(0.3) hue-rotate(15deg); }
+}
+
+.damage-flash {
+  animation: damageFlash 0.3s ease-out;
+}
+
+#sound-controls {
+  position: fixed;
+  bottom: 40px;
+  right: 30px;
+  background: linear-gradient(145deg, #4A90E2, #357ABD);
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-family: 'Fredoka One', cursive;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: 2px solid #6AA9E9;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 1000;
+  font-size: 14px;
+}
+
+#sound-controls button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  padding: 5px;
+  transition: transform 0.2s;
+}
+
+#sound-controls button:hover {
+  transform: scale(1.1);
+}
+
+#start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#start-button {
+  background: linear-gradient(145deg, #32CD32, #228B22);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 25px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 24px;
+  border: 3px solid #90EE90;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(50, 205, 50, 0.4);
+}
+
+#start-button:hover {
+  transform: scale(1.1);
+}
+  </style>
+</head>
+<body>
+<!-- Add this right after the opening body tag -->
+<div id="start-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+  <button id="start-button" style="background: linear-gradient(145deg, #32CD32, #228B22); color: white; padding: 20px 40px; border-radius: 25px; font-family: 'Fredoka One', cursive; font-size: 24px; border: 3px solid #90EE90; cursor: pointer; box-shadow: 0 8px 20px rgba(50, 205, 50, 0.4);">🎮 Click to Start Game 🎵</button>
+</div>
+
+  <div id="currency">
+    <img src="" alt="💰" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.textContent='💰';">
+    <span style="display:none; font-size: 24px;">💰</span>
+    <span id="moneyText">$0</span>
+  </div>
+<div id="wood-display"  style="position: absolute; top: 90px; right: 30px; background: linear-gradient(145deg, #8B4513, #A0522D); border-radius: 25px; padding: 12px 25px; font-size: 22px; font-family: 'Fredoka One', cursive; color: white; box-shadow: 0 8px 20px rgba(139, 69, 19, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3); display: flex; align-items: center; gap: 10px; border: 3px solid #CD853F; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); z-index: 100;">
+  <span style="font-size: 24px;">🪵</span>
+  <span id="woodText">0</span>
+</div>
+  <div id="progress">
+  <div style="margin-bottom: 12px; font-size: 20px;">Stage <span id="stage-number">1</span></div>
+  <div style="background: rgba(0,0,0,0.3); border-radius: 18px; padding: 4px; border: 2px solid #FFB6C1;">
+    <div id="progress-bar" style="height: 25px; background: linear-gradient(90deg, #32CD32, #90EE90); border-radius: 15px; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; position: relative;">
+      <span id="progress-text" style="color: white; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); position: absolute;">0%</span>
+    </div>
+  </div>
+</div>
+
+<div id="tree-selector">
+  <span>Current Tree:</span>
+  <span id="current-tree-display">🌳 Oak Tree (1x)</span>
+  <div style="margin-left: 15px; display: flex; gap: 8px;">
+    <button onclick="switchTreeType('oak')" style="background: #228B22; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-family: 'Fredoka One', cursive;">🌳</button>
+    <button onclick="switchTreeType('pine')" id="pine-btn" style="background: #006400; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-family: 'Fredoka One', cursive; display: none;">🌲</button>
+    <button onclick="switchTreeType('maple')" id="maple-btn" style="background: #8B4513; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-family: 'Fredoka One', cursive; display: none;">🍁</button>
+    <button onclick="switchTreeType('redwood')" id="redwood-btn" style="background: #654321; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-family: 'Fredoka One', cursive; display: none;">🌴</button>
+    <button onclick="switchTreeType('mystical')" id="mystical-btn" style="background: #4B0082; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-family: 'Fredoka One', cursive; display: none;">✨</button>
+  </div>
+</div>
+
+  <div id="combo-display">
+    🔥 COMBO x<span id="combo-level">1</span>
+  </div>
+
+  <div id="boss-button" onclick="startBossFight()">
+    🌳 BOSS<br>BATTLE!
+  </div>
+ 
+ <div class="upgrade" onclick="toggleSellMenu()" id="sell-upgrade" style="background: linear-gradient(145deg, #32CD32, #228B22);">
+  <div style="font-size: 32px;">💰</div>
+  <div>Sell Wood<br>Menu</div>
+</div>
+
+<div id="sell-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; display: none; font-family: 'Fredoka One', cursive; text-align: center;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(145deg, #8B4513, #A0522D); padding: 40px; border-radius: 30px; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 4px solid #CD853F; min-width: 400px;">
+    <h2 style="margin-top: 0; font-size: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🪵 Wood Market 🪵</h2>
+    <div style="margin: 20px 0; font-size: 24px;">
+      Wood: <span id="sell-wood-display">0</span> 🪵
+    </div>
+    <div style="margin: 20px 0; font-size: 20px;">
+      Price: $<span id="wood-price">1</span> per wood
+    </div>
+    <div style="margin: 30px 0;">
+      <button onclick="sellWood(1)" style="background: linear-gradient(145deg, #32CD32, #228B22); color: white; padding: 15px 25px; margin: 5px; border-radius: 15px; border: 3px solid #90EE90; font-family: 'Fredoka One', cursive; font-size: 16px; cursor: pointer;">Sell 1</button>
+      <button onclick="sellWood(10)" style="background: linear-gradient(145deg, #32CD32, #228B22); color: white; padding: 15px 25px; margin: 5px; border-radius: 15px; border: 3px solid #90EE90; font-family: 'Fredoka One', cursive; font-size: 16px; cursor: pointer;">Sell 10</button>
+      <button onclick="sellWood(100)" style="background: linear-gradient(145deg, #32CD32, #228B22); color: white; padding: 15px 25px; margin: 5px; border-radius: 15px; border: 3px solid #90EE90; font-family: 'Fredoka One', cursive; font-size: 16px; cursor: pointer;">Sell 100</button>
+      <button onclick="sellAllWood()" style="background: linear-gradient(145deg, #FFD700, #FFA500); color: #2C1810; padding: 15px 25px; margin: 5px; border-radius: 15px; border: 3px solid #FFB347; font-family: 'Fredoka One', cursive; font-size: 16px; cursor: pointer;">Sell All</button>
+    </div>
+    <button onclick="closeSellMenu()" style="background: linear-gradient(145deg, #FF6B35, #FF4500); color: white; padding: 15px 30px; border-radius: 15px; border: 3px solid #FFB347; font-family: 'Fredoka One', cursive; font-size: 18px; cursor: pointer;">Close</button>
+  </div>
+</div>
+  <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); display: inline-block;">
+  <div id="tree" onclick="chopTree(event)" style="cursor: pointer; transition: transform 0.1s ease; display: flex; align-items: center; justify-content: center;">
+    <img src="" alt="🌳" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" style="width: 300px; height: 375px; filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4));">
+    <span style="display:none; font-size: 240px; color: #228B22; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">🌳</span>
+  </div>
+  <div id="axe" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0; pointer-events: none; z-index: 10; transition: all 0.2s ease;">
+    <img src="" alt="🪓" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" style="width: 90px; height: 90px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));">
+    <span style="display:none; font-size: 75px;">🪓</span>
+  </div>
+</div>
+
+  <div id="upgrades">
+    <div class="upgrade" onclick="buyAxePower()" id="axe-upgrade">
+      <div class="upgrade-level" id="axe-level">1</div>
+      <img src="" alt="🪓" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+      <div style="display:none; font-size: 32px;">🪓</div>
+      <div>Axe Power<br>$<span id="axe-cost">20</span></div>
+    </div>
+    <div class="upgrade" onclick="buyAutoChopper()" id="auto-upgrade">
+      <div class="upgrade-level" id="auto-level">0</div>
+      <img src="" alt="⚙️" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+      <div style="display:none; font-size: 32px;">⚙️</div>
+      <div>Auto-Chopper<br>$<span id="auto-cost">100</span></div>
+    </div>
+    <div class="upgrade" onclick="buyWorker()" id="worker-upgrade">
+      <div class="upgrade-level" id="worker-level">0</div>
+      <img src="" alt="👷" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+      <div style="display:none; font-size: 32px;">👷</div>
+      <div>Lumberjack<br>$<span id="worker-cost">500</span></div>
+    </div>
+	<div class="upgrade" onclick="buySuperAxe()" id="super-axe-upgrade" style="display: none;">
+      <div class="upgrade-level" id="super-axe-level">0</div>
+      <div style="font-size: 32px;">💪</div>
+      <div>Super Axe<br>$<span id="super-axe-cost">2000</span></div>
+    </div>
+    <div class="upgrade" onclick="buyChainsaw()" id="chainsaw-upgrade" style="display: none;">
+      <div class="upgrade-level" id="chainsaw-level">0</div>
+      <div style="font-size: 32px;">⚡</div>
+      <div>Chainsaw<br>$<span id="chainsaw-cost">8000</span></div>
+    </div>
+    <div class="upgrade" onclick="buyHarvester()" id="harvester-upgrade" style="display: none;">
+      <div class="upgrade-level" id="harvester-level">0</div>
+      <div style="font-size: 32px;">🚜</div>
+      <div>Harvester<br>$<span id="harvester-cost">25000</span></div>
+    </div>
+  </div>
+
+<!-- Boss Fight Overlay - FIXED VERSION -->
+<div id="boss-overlay">
+  <div id="boss-container">
+    <div id="boss-currency">
+      <img src="" alt="💰" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.textContent='💰';">
+      <span style="display:none; font-size: 24px;">💰</span>
+      <span id="boss-money-text">$0</span>
+    </div>
+	<div id="boss-wood-display" style="position: absolute; top: 90px; right: 30px; background: linear-gradient(145deg, #8B4513, #A0522D); border-radius: 25px; padding: 12px 25px; font-size: 22px; font-family: 'Fredoka One', cursive; color: white; box-shadow: 0 8px 20px rgba(139, 69, 19, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3); display: flex; align-items: center; gap: 10px; border: 3px solid #CD853F; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); z-index: 100;">
+  <span style="font-size: 24px;">🪵</span>
+  <span id="boss-wood-text">0</span>
+</div>
+
+  <div id="boss-health-display">
+  <div style="margin-bottom: 8px; font-size: 18px;">🌲 Boss Damage</div>
+  <div style="background: rgba(0,0,0,0.3); border-radius: 18px; padding: 4px; border: 2px solid #FFB6C1;">
+    <div id="boss-health-bar" style="height: 25px; background: linear-gradient(90deg, #32CD32, #90EE90); border-radius: 15px; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; position: relative;">
+      <span id="boss-health-text" style="color: white; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); position: absolute;">0%</span>
+    </div>
+  </div>
+</div>
+
+
+<div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); display: inline-block;">
+  <div id="boss-tree" onclick="chopBoss(event)" style="cursor: pointer; transition: transform 0.1s ease; display: flex; align-items: center; justify-content: center;">
+    <img src="" alt="🌲" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" style="width: 300px; height: 375px; filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4)) brightness(0.7) sepia(0.3) hue-rotate(15deg);">
+    <span style="display:none; font-size: 240px; color: #8B4513; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">🌲</span>
+  </div>
+  <div id="boss-axe" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0; pointer-events: none; z-index: 10; transition: all 0.2s ease;">
+    <img src="" alt="🪓" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" style="width: 90px; height: 90px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));">
+    <span style="display:none; font-size: 75px;">🪓</span>
+  </div>
+</div>
+    <div id="boss-upgrades">
+      <div class="upgrade" onclick="buyAxePower()" id="boss-axe-upgrade">
+        <div class="upgrade-level" id="boss-axe-level">1</div>
+        <img src="" alt="🪓" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <div style="display:none; font-size: 32px;">🪓</div>
+        <div>Axe Power<br>$<span id="boss-axe-cost">20</span></div>
+      </div>
+      <div class="upgrade" onclick="buyAutoChopper()" id="boss-auto-upgrade">
+        <div class="upgrade-level" id="boss-auto-level">0</div>
+        <img src="" alt="⚙️" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <div style="display:none; font-size: 32px;">⚙️</div>
+        <div>Auto-Chopper<br>$<span id="boss-auto-cost">100</span></div>
+      </div>
+      <div class="upgrade" onclick="buyWorker()" id="boss-worker-upgrade">
+        <div class="upgrade-level" id="boss-worker-level">0</div>
+        <img src="" alt="👷" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <div style="display:none; font-size: 32px;">👷</div>
+        <div>Lumberjack<br>$<span id="boss-worker-cost">500</span></div>
+      </div>
+	  <div class="upgrade" onclick="buySuperAxe()" id="boss-super-axe-upgrade" style="display: none;">
+        <div class="upgrade-level" id="boss-super-axe-level">0</div>
+        <div style="font-size: 32px;">💪</div>
+        <div>Super Axe<br>$<span id="boss-super-axe-cost">2000</span></div>
+      </div>
+      <div class="upgrade" onclick="buyChainsaw()" id="boss-chainsaw-upgrade" style="display: none;">
+        <div class="upgrade-level" id="boss-chainsaw-level">0</div>
+        <div style="font-size: 32px;">⚡</div>
+        <div>Chainsaw<br>$<span id="boss-chainsaw-cost">8000</span></div>
+      </div>
+      <div class="upgrade" onclick="buyHarvester()" id="boss-harvester-upgrade" style="display: none;">
+        <div class="upgrade-level" id="boss-harvester-level">0</div>
+        <div style="font-size: 32px;">🚜</div>
+        <div>Harvester<br>$<span id="boss-harvester-cost">25000</span></div>
+      </div>
+      <button onclick="exitBossFight()" style="background: linear-gradient(145deg, #FF6B35, #FF4500); color: white; padding: 20px 15px; border-radius: 20px; width: 140px; cursor: pointer; font-family: 'Fredoka One', cursive; font-size: 16px; border: 3px solid #FFB347; box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);">
+        🚪 Exit Boss<br>Fight
+      </button>
+	 <div class="upgrade" onclick="toggleBossSellMenu()" id="boss-sell-upgrade" style="background: linear-gradient(145deg, #32CD32, #228B22);">
+  <div style="font-size: 32px;">💰</div>
+  <div>Sell Wood<br>Menu</div>
+</div>
+    </div>
+  </div>
+</div>
+
+  <div id="sound-controls">
+    <button onclick="toggleMusic()" id="music-toggle">🎵</button>
+    <button onclick="toggleSoundEffects()" id="sfx-toggle">🔊</button>
+  </div>
+
+  <audio id="background-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c6ff1ecd.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="boss-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73acc.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="chop-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8a901362c.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="purchase-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="achievement-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_88447e252f.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+  // Prevent default drag and select behaviors
+document.addEventListener('selectstart', function(e) {
+  e.preventDefault();
+});
+
+document.addEventListener('dragstart', function(e) {
+  e.preventDefault();
+});
+    // Game state
+    let gameState = {
+      money: 0,
+      axePower: 1,
+      autoChopper: 0,
+      workers: 0,
+      progress: 0,
+      stage: 1,
+      totalLogs: 0,
+      treesCut: 0,
+      comboMultiplier: 1,
+      lastClickTime: 0,
+      achievements: new Set(),
+      inBossFight: false,
+      bossHealth: 0,
+      bossMaxHealth: 0,
+      canStartBoss: false,
+	  wood: 0,  
+	  bossDamageDealt: 0,
+      currentTreeType: 'oak',
+      unlockedTrees: ['oak'],
+      superAxe: 0,
+      chainsaw: 0,
+      harvester: 0,
+      unlockedUpgrades: ['axe', 'auto', 'worker'],
+      musicEnabled: true,
+      soundEffectsEnabled: true
+    };
+const treeTypes = {
+  oak: {
+    name: '🌳 Oak Tree',
+    baseValue: 1,
+    unlockStage: 1,
+    bgColor: '#228B22'
+  },
+  pine: {
+    name: '🌲 Pine Tree', 
+    baseValue: 2,
+    unlockStage: 5,
+    bgColor: '#006400'
+  },
+  maple: {
+    name: '🍁 Maple Tree',
+    baseValue: 4,
+    unlockStage: 10,
+    bgColor: '#8B4513'
+  },
+  redwood: {
+    name: '🌴 Redwood Tree',
+    baseValue: 8,
+    unlockStage: 15,
+    bgColor: '#654321'
+  },
+  mystical: {
+    name: '✨ Mystical Tree',
+    baseValue: 16,
+    unlockStage: 25,
+    bgColor: '#4B0082'
+  }
+};
+    // Upgrade costs
+   let upgradeCosts = {
+  axe: 20,
+  auto: 100,
+  worker: 500,
+  superAxe: 2000,     // NEW
+  chainsaw: 8000,     // NEW  
+  harvester: 25000    // NEW
+};
+
+    // Achievement definitions
+    const achievements = [
+      { id: 'first_log', condition: () => gameState.totalLogs >= 1, message: '🪵 First Log Cut!' },
+      { id: 'first_tree', condition: () => gameState.treesCut >= 1, message: '🌳 First Tree Completed!' },
+      { id: 'log_collector', condition: () => gameState.totalLogs >= 100, message: '🏆 Log Collector - 100 logs!' },
+      { id: 'tree_master', condition: () => gameState.treesCut >= 10, message: '🌲 Tree Master - 10 trees!' },
+      { id: 'millionaire', condition: () => gameState.money >= 1000000, message: '💰 Millionaire Lumberjack!' },
+      { id: 'stage_10', condition: () => gameState.stage >= 10, message: '⭐ Stage 10 Master!' }
+    ];
+
+    // Load save data (using in-memory storage for artifact)
+    let saveData = null;
+    
+    function loadGame() {
+  if (saveData) {
+    Object.assign(gameState, saveData);
+    gameState.achievements = new Set(saveData.achievements || []);
+    gameState.wood = gameState.wood || 0; // Add this line
+  
+  gameState.currentTreeType = gameState.currentTreeType || 'oak';
+gameState.unlockedTrees = gameState.unlockedTrees || ['oak'];
+gameState.superAxe = gameState.superAxe || 0;
+gameState.chainsaw = gameState.chainsaw || 0;
+gameState.harvester = gameState.harvester || 0;
+gameState.unlockedUpgrades = gameState.unlockedUpgrades || ['axe', 'auto', 'worker'];
+
+// Add this line right before updateUI() in loadGame():
+updateTreeDisplay();
+}
+  updateUI();
+}
+
+    // Save game data (using in-memory storage for artifact)
+    function saveGame() {
+      saveData = {
+        ...gameState,
+        achievements: Array.from(gameState.achievements)
+      };
+    }
+
+    // Main tree chopping function
+   function chopTree(event) {
+  event.stopPropagation();
+  
+  const now = Date.now();
+  const timeDiff = now - gameState.lastClickTime;
+  
+  // Combo system - faster clicking = higher multiplier
+ if (timeDiff < 400) { // Reduced from 600ms to 400ms
+  gameState.comboMultiplier = Math.min(gameState.comboMultiplier + 0.1, 2.0); // Reduced gain and max
+} else {
+  gameState.comboMultiplier = Math.max(gameState.comboMultiplier - 0.15, 1); // Faster decay
+}
+  
+  gameState.lastClickTime = now;
+  
+  const baseAmount = gameState.axePower + (gameState.superAxe * 5) + (gameState.chainsaw * 15) + (gameState.harvester * 40);
+  const treeMultiplier = treeTypes[gameState.currentTreeType].baseValue;
+  const earnAmount = Math.floor(baseAmount * gameState.comboMultiplier * treeMultiplier);
+  gameState.wood += earnAmount;
+  
+  const stageGoal = Math.floor(gameState.stage * 150 * Math.pow(1.2, gameState.stage - 1));
+  if (gameState.progress < stageGoal) {
+    gameState.progress += earnAmount;
+    gameState.progress = Math.min(gameState.progress, stageGoal);
+  }
+  
+  gameState.totalLogs += earnAmount;
+  
+  // Visual feedback
+  shakeTree();
+  swingAxe();
+  showFloatingText(`+${earnAmount} 🪵`, event.clientX, event.clientY);
+  playSound('chop-sound');
+  
+  checkStageProgress();
+  checkAchievements();
+  updateUI();
+  saveGame();
+}
+
+    // Tree shake animation
+    function shakeTree() {
+      const tree = document.getElementById('tree');
+      tree.classList.add('shake');
+      setTimeout(() => tree.classList.remove('shake'), 300);
+    }
+
+    // Axe swing animation
+    function swingAxe() {
+      const axe = document.getElementById('axe');
+      axe.classList.add('axe-swing');
+      setTimeout(() => axe.classList.remove('axe-swing'), 200);
+    }
+
+    // Floating damage text
+    function showFloatingText(text, x, y) {
+      const element = document.createElement('div');
+      element.className = 'floating-text';
+      element.textContent = text;
+      element.style.left = x + 'px';
+      element.style.top = y + 'px';
+      document.body.appendChild(element);
+      
+      setTimeout(() => element.remove(), 1200);
+    }
+
+    // Stage progression
+    function checkStageProgress() {
+  const stageGoal = Math.floor(gameState.stage * 150 * Math.pow(1.2, gameState.stage - 1));
+  if (gameState.progress >= stageGoal) {
+    gameState.canStartBoss = true;
+  }
+  
+  // Check for new tree unlocks
+  for (const [treeType, config] of Object.entries(treeTypes)) {
+    if (gameState.stage >= config.unlockStage && !gameState.unlockedTrees.includes(treeType)) {
+      gameState.unlockedTrees.push(treeType);
+      showAchievement(`🌳 NEW TREE UNLOCKED!<br>${config.name} (${config.baseValue}x value!)`);
+    }
+  }
+  
+  // Check for new upgrade unlocks
+  if (gameState.stage >= 8 && !gameState.unlockedUpgrades.includes('superAxe')) {
+    gameState.unlockedUpgrades.push('superAxe');
+    showAchievement('💪 SUPER AXE UNLOCKED!<br>More powerful chopping!');
+  }
+  if (gameState.stage >= 12 && !gameState.unlockedUpgrades.includes('chainsaw')) {
+    gameState.unlockedUpgrades.push('chainsaw');
+    showAchievement('⚡ CHAINSAW UNLOCKED!<br>Ultra-fast cutting power!');
+  }
+  if (gameState.stage >= 20 && !gameState.unlockedUpgrades.includes('harvester')) {
+    gameState.unlockedUpgrades.push('harvester');
+    showAchievement('🚜 HARVESTER UNLOCKED!<br>Industrial logging machine!');
+  }
+}
+
+ // Add this function to your JavaScript
+function forceBossFonts() {
+  const bossElements = document.querySelectorAll('#boss-overlay *');
+  bossElements.forEach(element => {
+    element.style.setProperty('font-family', "'Fredoka One', cursive", 'important');
+  });
+}
+
+function setupBossEvents() {
+  const bossTree = document.getElementById('boss-tree');
+  if (bossTree) {
+    bossTree.onclick = chopBoss;
+    console.log("Boss tree click event attached");
+  } else {
+    console.log("Boss tree element not found!");
+  }
+}
+// Replace your startBossFight function with this:
+// Replace ALL your boss-related JavaScript with this corrected version:
+
+// Replace your boss fight functions with these:
+
+function startBossFight() {
+  gameState.inBossFight = true;
+  gameState.canStartBoss = false;
+  
+  if (gameState.musicEnabled) {
+    const backgroundMusic = document.getElementById('background-music');
+    const bossMusic = document.getElementById('boss-music');
+    backgroundMusic.pause();
+    bossMusic.currentTime = 0;
+    bossMusic.play();
+  }
+  
+  // Initialize boss health only if it's a new boss fight
+  if (gameState.bossHealth <= 0) {
+   gameState.bossMaxHealth = Math.floor(gameState.stage * 800 * Math.pow(1.5, gameState.stage - 1)) + 1000;
+    gameState.bossHealth = gameState.bossMaxHealth;
+    gameState.bossDamageDealt = 0; // Track damage dealt instead
+  }
+  
+  document.getElementById('boss-overlay').style.display = 'block';
+  updateBossUI();
+}
+
+function chopBoss(event) {
+  if (event) event.stopPropagation();
+  
+  if (!gameState.inBossFight) {
+    return;
+  }
+  
+  const now = Date.now();
+  const timeDiff = now - gameState.lastClickTime;
+  
+  if (timeDiff < 400) {
+    gameState.comboMultiplier = Math.min(gameState.comboMultiplier + 0.1, 2.0);
+  } else {
+    gameState.comboMultiplier = Math.max(gameState.comboMultiplier - 0.15, 1);
+  }
+  
+  gameState.lastClickTime = now;
+  
+  const damage = Math.floor(gameState.axePower * gameState.comboMultiplier);
+  gameState.bossHealth = Math.max(0, gameState.bossHealth - damage);
+  gameState.bossDamageDealt = Math.min(gameState.bossMaxHealth, gameState.bossDamageDealt + damage);
+  gameState.totalLogs += damage;
+  
+  // Visual feedback
+  const bossTree = document.getElementById('boss-tree');
+  if (bossTree) {
+    bossTree.classList.add('boss-shake');
+    // Add damage flash effect
+    const bossTreeImage = bossTree.querySelector('img, span');
+    if (bossTreeImage) {
+      bossTreeImage.classList.remove('damage-flash');
+      void bossTreeImage.offsetWidth; // Trigger reflow to restart animation
+      bossTreeImage.classList.add('damage-flash');
+    }
+    setTimeout(() => {
+      bossTree.classList.remove('boss-shake');
+      if (bossTreeImage) {
+        bossTreeImage.classList.remove('damage-flash');
+      }
+    }, 400);
+  }
+  
+  // Axe swing animation
+  const bossAxe = document.getElementById('boss-axe');
+  if (bossAxe) {
+    bossAxe.classList.add('axe-swing');
+    setTimeout(() => bossAxe.classList.remove('axe-swing'), 200);
+  }
+  
+  showFloatingText(`-${damage}`, event.clientX, event.clientY);
+  
+  checkAchievements();
+  updateBossUI();
+  saveGame();
+  playSound('chop-sound');
+  
+  if (gameState.bossHealth <= 0) {
+    defeatBoss();
+  }
+}
+
+function updateBossUI() {
+  if (gameState.inBossFight) {
+    // Keep the same money (it updates as you fight)
+    const bossMoneyText = document.getElementById('boss-money-text');
+    if (bossMoneyText) {
+      bossMoneyText.textContent = `$${formatNumber(gameState.money)}`;
+    }
+    const bossWoodText = document.getElementById('boss-wood-text');
+if (bossWoodText) {
+  bossWoodText.textContent = formatNumber(gameState.wood);
+}
+    // Show boss health instead of stage progress
+    const bossHealthDisplay = document.getElementById('boss-health-display');
+    const bossHealthElement = document.getElementById('boss-health');
+    const bossMaxHealthElement = document.getElementById('boss-max-health');
+    
+    if (bossHealthElement) {
+      bossHealthElement.textContent = gameState.bossHealth;
+    }
+    if (bossMaxHealthElement) {
+      bossMaxHealthElement.textContent = gameState.bossMaxHealth;
+    }
+    // Update boss health bar
+// Update boss damage bar (goes UP as you deal damage)
+if (gameState.bossMaxHealth > 0) {
+  const damagePercent = Math.floor((gameState.bossDamageDealt / gameState.bossMaxHealth) * 100);
+  document.getElementById('boss-health-bar').style.width = damagePercent + '%';
+  document.getElementById('boss-health-text').textContent = damagePercent + '%';
+  
+  // Change bar color based on damage dealt
+  const healthBar = document.getElementById('boss-health-bar');
+  if (damagePercent >= 75) {
+    healthBar.style.background = 'linear-gradient(90deg, #FFD700, #FFA500)'; // Gold when almost complete
+  } else if (damagePercent >= 50) {
+    healthBar.style.background = 'linear-gradient(90deg, #90EE90, #32CD32)'; // Green when halfway
+  } else {
+    healthBar.style.background = 'linear-gradient(90deg, #32CD32, #90EE90)'; // Normal green
+  }
+}
+    // Show combo in boss fight too
+    const comboDisplay = document.getElementById('combo-display');
+    if (gameState.comboMultiplier > 1.1) {
+      comboDisplay.style.display = 'block';
+      document.getElementById('combo-level').textContent = gameState.comboMultiplier.toFixed(1);
+    } else {
+      comboDisplay.style.display = 'none';
+    }
+    
+    // Update upgrade costs and levels (same as main game)
+    const elements = {
+      'boss-axe-cost': upgradeCosts.axe,
+      'boss-auto-cost': upgradeCosts.auto,
+      'boss-worker-cost': upgradeCosts.worker,
+      'boss-axe-level': gameState.axePower,
+      'boss-auto-level': gameState.autoChopper,
+      'boss-worker-level': gameState.workers
+    };
+    
+    for (const [id, value] of Object.entries(elements)) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = id.includes('cost') ? formatNumber(value) : value;
+      }
+    }
+    
+    // Update affordable status
+    const affordableElements = [
+      ['boss-axe-upgrade', upgradeCosts.axe],
+      ['boss-auto-upgrade', upgradeCosts.auto],
+      ['boss-worker-upgrade', upgradeCosts.worker]
+    ];
+    
+    affordableElements.forEach(([id, cost]) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.toggle('affordable', gameState.money >= cost);
+      }
+    });
+  }
+}
+
+function defeatBoss() {
+  const reward = Math.floor(gameState.stage * 500 + (gameState.stage * 200));
+  gameState.money += reward;
+  gameState.stage++;
+  gameState.progress = 0; // Reset progress for next stage
+  gameState.treesCut++;
+  gameState.inBossFight = false;
+  
+  // Reset boss health for next fight
+  gameState.bossHealth = 0;
+  gameState.bossMaxHealth = 0;
+  gameState.bossDamageDealt = 0;
+  
+  document.getElementById('boss-overlay').style.display = 'none';
+  
+  showAchievement(`🏆 BOSS DEFEATED!<br>+${formatNumber(reward)} • Stage ${gameState.stage} Unlocked!`);
+  
+  updateUI();
+  saveGame();
+}
+
+function exitBossFight() {
+  gameState.inBossFight = false;
+  
+  if (gameState.musicEnabled) {
+    const backgroundMusic = document.getElementById('background-music');
+    const bossMusic = document.getElementById('boss-music');
+    bossMusic.pause();
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play();
+  }
+  
+  // Don't reset boss health - they can continue the fight later
+  document.getElementById('boss-overlay').style.display = 'none';
+  updateUI();
+  saveGame();
+}
+
+// Auto-income should work in boss fights too
+// Update your auto-income interval to this:
+setInterval(() => {
+  const baseAutoIncome = gameState.autoChopper + (gameState.workers * 3) + (gameState.superAxe * 2) + (gameState.chainsaw * 8) + (gameState.harvester * 25);
+  const autoIncome = Math.floor(baseAutoIncome * treeTypes[gameState.currentTreeType].baseValue);
+  
+  if (autoIncome > 0) {
+    if (gameState.inBossFight) {
+      const bossDamage = Math.floor(autoIncome / 4);
+      gameState.bossHealth = Math.max(0, gameState.bossHealth - bossDamage);
+      gameState.bossDamageDealt = Math.min(gameState.bossMaxHealth, gameState.bossDamageDealt + bossDamage);
+      
+      if (Math.random() < 0.3) {
+        const bossAxe = document.getElementById('boss-axe');
+        const bossTree = document.getElementById('boss-tree');
+        if (bossAxe) {
+          bossAxe.classList.add('axe-swing');
+          setTimeout(() => bossAxe.classList.remove('axe-swing'), 200);
+        }
+        if (bossTree) {
+          bossTree.classList.add('boss-shake');
+          const bossTreeImage = bossTree.querySelector('img, span');
+          if (bossTreeImage) {
+            bossTreeImage.classList.remove('damage-flash');
+            void bossTreeImage.offsetWidth; // Trigger reflow
+            bossTreeImage.classList.add('damage-flash');
+          }
+          setTimeout(() => {
+            bossTree.classList.remove('boss-shake');
+            if (bossTreeImage) {
+              bossTreeImage.classList.remove('damage-flash');
+            }
+          }, 400);
+        }
+      }
+      
+      updateBossUI();
+      
+      if (gameState.bossHealth <= 0) {
+        defeatBoss();
+      }
+    } else {
+      // Normal game progression
+      gameState.money += autoIncome;
+      gameState.wood += autoIncome;
+      gameState.totalLogs += autoIncome;
+      
+      const stageGoal = gameState.stage * 100;
+      if (gameState.progress < stageGoal) {
+        gameState.progress += autoIncome;
+        gameState.progress = Math.min(gameState.progress, stageGoal);
+      }
+      
+      if (Math.random() < 0.3) {
+        swingAxe();
+        shakeTree();
+      }
+      
+      checkStageProgress();
+    }
+    
+    checkAchievements();
+    updateUI();
+    saveGame();
+  }
+  
+  // Combo multiplier decays
+  if (gameState.comboMultiplier > 1) {
+    gameState.comboMultiplier = Math.max(gameState.comboMultiplier - 0.08, 1);
+    if (gameState.inBossFight) updateBossUI();
+    else updateUI();
+  }
+}, 1000);
+
+// Set up boss tree click event
+window.onload = function() {
+  loadGame();
+  
+  // Set up boss tree click event
+  const bossTree = document.getElementById('boss-tree');
+  if (bossTree) {
+    bossTree.addEventListener('click', function(event) {
+      chopBoss(event);
+    });
+  }
+  
+  // Start background music if enabled
+  if (gameState.musicEnabled) {
+    const backgroundMusic = document.getElementById('background-music');
+    backgroundMusic.volume = 0.3;
+    backgroundMusic.play().catch(function(error) {
+      console.log("Audio play failed:", error);
+    });
+  }
+  
+  // Set initial volumes for all sounds
+  const bossMusic = document.getElementById('boss-music');
+  bossMusic.volume = 0.3;
+  
+  const chopSound = document.getElementById('chop-sound');
+  chopSound.volume = 0.4;
+  
+  const purchaseSound = document.getElementById('purchase-sound');
+  purchaseSound.volume = 0.4;
+  
+  const achievementSound = document.getElementById('achievement-sound');
+  achievementSound.volume = 0.4;
+};
+    
+	// Achievement system
+    function checkAchievements() {
+      achievements.forEach(achievement => {
+        if (!gameState.achievements.has(achievement.id) && achievement.condition()) {
+          gameState.achievements.add(achievement.id);
+          showAchievement(achievement.message);
+        }
+      });
+    }
+
+    function showAchievement(message) {
+      const element = document.createElement('div');
+      element.className = 'achievement';
+      element.innerHTML = `🏆 ACHIEVEMENT!<br>${message}`;
+      document.body.appendChild(element);
+      
+      playSound('achievement-sound');
+      setTimeout(() => element.remove(), 3000);
+    }
+
+    // Upgrade functions
+    function buyAxePower() {
+      if (gameState.money >= upgradeCosts.axe) {
+        gameState.money -= upgradeCosts.axe;
+        gameState.axePower++;
+        upgradeCosts.axe = Math.floor(upgradeCosts.axe * 1.8);
+        playSound('purchase-sound');
+        updateUI();
+        saveGame();
+      }
+    }
+
+    function buyAutoChopper() {
+      if (gameState.money >= upgradeCosts.auto) {
+        gameState.money -= upgradeCosts.auto;
+        gameState.autoChopper++;
+        upgradeCosts.auto = Math.floor(upgradeCosts.auto * 2.2);
+        playSound('purchase-sound');
+        updateUI();
+        saveGame();
+      }
+    }
+
+    function buyWorker() {
+      if (gameState.money >= upgradeCosts.worker) {
+        gameState.money -= upgradeCosts.worker;
+        gameState.workers++;
+        upgradeCosts.worker = Math.floor(upgradeCosts.worker * 2.5);
+        playSound('purchase-sound');
+        updateUI();
+        saveGame();
+      }
+    }
+	function buySuperAxe() {
+  if (gameState.money >= upgradeCosts.superAxe) {
+    gameState.money -= upgradeCosts.superAxe;
+    gameState.superAxe++;
+    upgradeCosts.superAxe = Math.floor(upgradeCosts.superAxe * 2.8);
+    playSound('purchase-sound');
+    updateUI();
+    saveGame();
+  }
+}
+
+function buyChainsaw() {
+  if (gameState.money >= upgradeCosts.chainsaw) {
+    gameState.money -= upgradeCosts.chainsaw;
+    gameState.chainsaw++;
+    upgradeCosts.chainsaw = Math.floor(upgradeCosts.chainsaw * 3.2);
+    playSound('purchase-sound');
+    updateUI();
+    saveGame();
+  }
+}
+
+function buyHarvester() {
+  if (gameState.money >= upgradeCosts.harvester) {
+    gameState.money -= upgradeCosts.harvester;
+    gameState.harvester++;
+    upgradeCosts.harvester = Math.floor(upgradeCosts.harvester * 4.0);
+    playSound('purchase-sound');
+    updateUI();
+    saveGame();
+  }
+}
+
+function switchTreeType(treeType) {
+  if (gameState.unlockedTrees.includes(treeType)) {
+    gameState.currentTreeType = treeType;
+    updateTreeDisplay();
+    updateUI();
+    saveGame();
+  }
+}
+
+function updateTreeDisplay() {
+  const tree = treeTypes[gameState.currentTreeType];
+  document.body.style.background = tree.bgColor;
+  
+  // Update tree emoji based on type
+  const treeEmojis = document.querySelectorAll('#tree span, #boss-tree span');
+  treeEmojis.forEach(emoji => {
+    if (gameState.currentTreeType === 'oak') emoji.textContent = '🌳';
+    else if (gameState.currentTreeType === 'pine') emoji.textContent = '🌲';
+    else if (gameState.currentTreeType === 'maple') emoji.textContent = '🍁';
+    else if (gameState.currentTreeType === 'redwood') emoji.textContent = '🌴';
+    else if (gameState.currentTreeType === 'mystical') emoji.textContent = '✨';
+  });
+}
+  function getWoodPrice() {
+  const basePrice = Math.max(1, Math.floor(gameState.stage * 0.5 + 1));
+  const treeMultiplier = treeTypes[gameState.currentTreeType].baseValue;
+  return basePrice * treeMultiplier;
+}
+
+    function toggleSellMenu() {
+      const sellOverlay = document.getElementById('sell-overlay');
+      if (sellOverlay.style.display === 'none' || !sellOverlay.style.display) {
+        sellOverlay.style.display = 'block';
+        updateSellMenu();
+      } else {
+        sellOverlay.style.display = 'none';
+      }
+    }
+
+    function closeSellMenu() {
+  document.getElementById('sell-overlay').style.display = 'none';
+  // If we were in a boss fight, return to it
+  if (gameState.inBossFight) {
+    document.getElementById('boss-overlay').style.display = 'block';
+  }
+}
+
+    function updateSellMenu() {
+      document.getElementById('sell-wood-display').textContent = formatNumber(gameState.wood);
+      document.getElementById('wood-price').textContent = getWoodPrice();
+    }
+
+    function sellWood(amount) {
+      const actualAmount = Math.min(amount, gameState.wood);
+      if (actualAmount > 0) {
+        const price = getWoodPrice();
+        const earnings = actualAmount * price;
+        
+        gameState.wood -= actualAmount;
+        gameState.money += earnings;
+        
+        // Show floating text
+        showFloatingText(`+$${formatNumber(earnings)}`, window.innerWidth/2, window.innerHeight/2);
+updateSellMenu();
+updateUI();
+if (gameState.inBossFight) {
+  updateBossUI(); // Add this line
+}
+saveGame();
+      }
+    }
+
+    function sellAllWood() {
+  sellWood(gameState.wood);
+  if (gameState.inBossFight) {
+    updateBossUI(); // Add this line
+  }
+}
+function toggleBossSellMenu() {
+  if (gameState.inBossFight) {
+    // Exit boss fight temporarily to access sell menu
+    document.getElementById('boss-overlay').style.display = 'none';
+    toggleSellMenu();
+  }
+}
+    // Update UI elements
+    function updateUI() {
+      const stageGoal = Math.floor(gameState.stage * 150 * Math.pow(1.2, gameState.stage - 1));
+      
+      document.getElementById('moneyText').textContent = `$${formatNumber(gameState.money)}`;
+	  document.getElementById('woodText').textContent = formatNumber(gameState.wood);
+// Update stage progress bar
+const progressPercent = Math.floor((gameState.progress / stageGoal) * 100);
+document.getElementById('stage-number').textContent = gameState.stage;
+document.getElementById('progress-bar').style.width = progressPercent + '%';
+document.getElementById('progress-text').textContent = progressPercent + '%';
+
+// Change bar color based on progress
+const progressBar = document.getElementById('progress-bar');
+if (progressPercent >= 100) {
+  progressBar.style.background = 'linear-gradient(90deg, #FFD700, #FFA500)'; // Gold when complete
+} else if (progressPercent >= 75) {
+  progressBar.style.background = 'linear-gradient(90deg, #90EE90, #32CD32)'; // Bright green
+} else {
+  progressBar.style.background = 'linear-gradient(90deg, #32CD32, #90EE90)'; // Normal green
+}
+      // Add pulse effect when stage is complete
+if (progressPercent >= 100) {
+  progressBar.classList.add('progress-complete');
+} else {
+  progressBar.classList.remove('progress-complete');
+}
+      // Show/hide boss button
+    const bossButton = document.getElementById('boss-button');
+  if ((gameState.canStartBoss || gameState.bossHealth > 0) && !gameState.inBossFight) {
+    bossButton.style.display = 'block';
+    // Change text if boss fight is in progress
+    if (gameState.bossHealth > 0 && gameState.bossHealth < gameState.bossMaxHealth) {
+      bossButton.innerHTML = '🌳 CONTINUE<br>BOSS!';
+    } else {
+      bossButton.innerHTML = '🌳 BOSS<br>BATTLE!';
+    }
+  } else {
+    bossButton.style.display = 'none';
+  }
+      
+      // Combo display
+      const comboDisplay = document.getElementById('combo-display');
+      if (gameState.comboMultiplier > 1.1 && !gameState.inBossFight) {
+        comboDisplay.style.display = 'block';
+        document.getElementById('combo-level').textContent = gameState.comboMultiplier.toFixed(1);
+      } else {
+        comboDisplay.style.display = 'none';
+      }
+      
+      updateUpgradeCosts();
+    }
+	const currentTree = treeTypes[gameState.currentTreeType];
+const treeDisplay = document.getElementById('current-tree-display');
+if (treeDisplay) {
+  treeDisplay.textContent = `${currentTree.name} (${currentTree.baseValue}x)`;
+}
+
+// Show/hide upgrades based on unlock status
+const upgradeVisibility = [
+  ['super-axe-upgrade', 'superAxe'],
+  ['chainsaw-upgrade', 'chainsaw'], 
+  ['harvester-upgrade', 'harvester']
+];
+
+upgradeVisibility.forEach(([elementId, upgradeType]) => {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.style.display = gameState.unlockedUpgrades.includes(upgradeType) ? 'flex' : 'none';
+  }
+});
+
+// Update boss upgrades too
+const bossUpgradeVisibility = [
+  ['boss-super-axe-upgrade', 'superAxe'],
+  ['boss-chainsaw-upgrade', 'chainsaw'],
+  ['boss-harvester-upgrade', 'harvester']
+];
+
+bossUpgradeVisibility.forEach(([elementId, upgradeType]) => {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.style.display = gameState.unlockedUpgrades.includes(upgradeType) ? 'flex' : 'none';
+  }
+});
+// Update boss upgrade costs for new upgrades
+if (document.getElementById('boss-super-axe-cost')) {
+  document.getElementById('boss-super-axe-cost').textContent = formatNumber(upgradeCosts.superAxe);
+  document.getElementById('boss-super-axe-level').textContent = gameState.superAxe;
+}
+if (document.getElementById('boss-chainsaw-cost')) {
+  document.getElementById('boss-chainsaw-cost').textContent = formatNumber(upgradeCosts.chainsaw);
+  document.getElementById('boss-chainsaw-level').textContent = gameState.chainsaw;
+}
+if (document.getElementById('boss-harvester-cost')) {
+  document.getElementById('boss-harvester-cost').textContent = formatNumber(upgradeCosts.harvester);
+  document.getElementById('boss-harvester-level').textContent = gameState.harvester;
+}
+// Show/hide tree buttons based on unlocks
+const treeButtons = [
+  ['pine-btn', 'pine'],
+  ['maple-btn', 'maple'],
+  ['redwood-btn', 'redwood'],
+  ['mystical-btn', 'mystical']
+];
+
+treeButtons.forEach(([buttonId, treeType]) => {
+  const button = document.getElementById(buttonId);
+  if (button) {
+    button.style.display = gameState.unlockedTrees.includes(treeType) ? 'block' : 'none';
+  }
+});
+    function updateUpgradeCosts() {
+  // Update upgrade costs and levels
+  document.getElementById('axe-cost').textContent = formatNumber(upgradeCosts.axe);
+  document.getElementById('auto-cost').textContent = formatNumber(upgradeCosts.auto);
+  document.getElementById('worker-cost').textContent = formatNumber(upgradeCosts.worker);
+  
+  document.getElementById('axe-level').textContent = gameState.axePower;
+  document.getElementById('auto-level').textContent = gameState.autoChopper;
+  document.getElementById('worker-level').textContent = gameState.workers;
+  
+  // Update new upgrades if they exist
+  if (document.getElementById('super-axe-cost')) {
+    document.getElementById('super-axe-cost').textContent = formatNumber(upgradeCosts.superAxe);
+    document.getElementById('super-axe-level').textContent = gameState.superAxe;
+  }
+  if (document.getElementById('chainsaw-cost')) {
+    document.getElementById('chainsaw-cost').textContent = formatNumber(upgradeCosts.chainsaw);
+    document.getElementById('chainsaw-level').textContent = gameState.chainsaw;
+  }
+  if (document.getElementById('harvester-cost')) {
+    document.getElementById('harvester-cost').textContent = formatNumber(upgradeCosts.harvester);
+    document.getElementById('harvester-level').textContent = gameState.harvester;
+  }
+  
+  // Highlight affordable upgrades
+  document.getElementById('axe-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.axe);
+  document.getElementById('auto-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.auto);
+  document.getElementById('worker-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.worker);
+  
+  // Highlight new upgrades if they exist
+  if (document.getElementById('super-axe-upgrade')) {
+    document.getElementById('super-axe-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.superAxe);
+  }
+  if (document.getElementById('chainsaw-upgrade')) {
+    document.getElementById('chainsaw-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.chainsaw);
+  }
+  if (document.getElementById('harvester-upgrade')) {
+    document.getElementById('harvester-upgrade').classList.toggle('affordable', gameState.money >= upgradeCosts.harvester);
+  }
+}
+
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return Math.floor(num).toString();
+    }
+
+// Sound control functions
+function toggleMusic() {
+  gameState.musicEnabled = !gameState.musicEnabled;
+  const musicToggle = document.getElementById('music-toggle');
+  musicToggle.textContent = gameState.musicEnabled ? '🎵' : '🔇';
+  
+  const backgroundMusic = document.getElementById('background-music');
+  const bossMusic = document.getElementById('boss-music');
+  
+  if (gameState.musicEnabled) {
+    if (gameState.inBossFight) {
+      bossMusic.play();
+    } else {
+      backgroundMusic.play();
+    }
+  } else {
+    backgroundMusic.pause();
+    bossMusic.pause();
+  }
+}
+
+function toggleSoundEffects() {
+  gameState.soundEffectsEnabled = !gameState.soundEffectsEnabled;
+  const sfxToggle = document.getElementById('sfx-toggle');
+  sfxToggle.textContent = gameState.soundEffectsEnabled ? '🔊' : '🔇';
+}
+
+function playSound(soundId) {
+  if (gameState.soundEffectsEnabled) {
+    const sound = document.getElementById(soundId);
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+}
+
+// Add this at the start of your script section, right after gameState definition
+let audioInitialized = false;
+
+// Add this function definition
+function initializeAudio() {
+  const startScreen = document.getElementById('start-screen');
+  const backgroundMusic = document.getElementById('background-music');
+  const bossMusic = document.getElementById('boss-music');
+  const chopSound = document.getElementById('chop-sound');
+  const purchaseSound = document.getElementById('purchase-sound');
+  const achievementSound = document.getElementById('achievement-sound');
+  
+  try {
+    // Set volumes
+    backgroundMusic.volume = 0.3;
+    bossMusic.volume = 0.3;
+    chopSound.volume = 0.4;
+    purchaseSound.volume = 0.4;
+    achievementSound.volume = 0.4;
+    
+    // Start background music if enabled
+    if (gameState.musicEnabled) {
+      backgroundMusic.play();
+    }
+    
+    // Hide start screen
+    if (startScreen) {
+      startScreen.style.display = 'none';
+    }
+    
+    audioInitialized = true;
+  } catch (error) {
+    console.error('Audio initialization failed:', error);
+    // Hide start screen even if audio fails
+    if (startScreen) {
+      startScreen.style.display = 'none';
+    }
+  }
+}
+
+// Add this to your window.onload function
+window.onload = function() {
+  loadGame();
+  
+  // Set up start button
+  const startButton = document.getElementById('start-button');
+  if (startButton) {
+    startButton.onclick = initializeAudio;
+  }
+  
+  // Set up boss tree click event
+  const bossTree = document.getElementById('boss-tree');
+  if (bossTree) {
+    bossTree.addEventListener('click', function(event) {
+      chopBoss(event);
+    });
+  }
+};
+
+// Update the playSound function
+function playSound(soundId) {
+  if (!audioInitialized || !gameState.soundEffectsEnabled) return;
+  
+  const sound = document.getElementById(soundId);
+  if (sound) {
+    sound.currentTime = 0;
+    sound.play().catch(error => console.log('Error playing sound:', error));
+  }
+}
+
+// Update the toggleMusic function
+function toggleMusic() {
+  if (!audioInitialized) return;
+  
+  gameState.musicEnabled = !gameState.musicEnabled;
+  const musicToggle = document.getElementById('music-toggle');
+  musicToggle.textContent = gameState.musicEnabled ? '🎵' : '🔇';
+  
+  const backgroundMusic = document.getElementById('background-music');
+  const bossMusic = document.getElementById('boss-music');
+  
+  if (gameState.musicEnabled) {
+    if (gameState.inBossFight) {
+      bossMusic.play().catch(console.error);
+    } else {
+      backgroundMusic.play().catch(console.error);
+    }
+  } else {
+    backgroundMusic.pause();
+    bossMusic.pause();
+  }
+}
+  </script>
+</body>
+</html>
